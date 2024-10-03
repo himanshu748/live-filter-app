@@ -1,15 +1,31 @@
+// Configure AWS SDK
+AWS.config.update({
+    region: 'ap-south-1', // Update to your region
+    credentials: new AWS.Credentials({
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    })
+});
+
+const s3 = new AWS.S3();
+
 const video = document.getElementById('video');
 const photoContainer = document.getElementById('photo-container');
 
-navigator.mediaDevices.getUserMedia({ video: true })
-    .then(stream => {
+const constraints = {
+    video: true
+};
+
+// Start video streaming
+navigator.mediaDevices.getUserMedia(constraints)
+    .then((stream) => {
         video.srcObject = stream;
     })
-    .catch(err => {
-        console.error("Error accessing media devices.", err);
+    .catch((error) => {
+        console.error('Error accessing media devices.', error);
     });
 
-// Filter buttons
+// Filters
 const filters = {
     none: 'none',
     grayscale: 'grayscale(100%)',
@@ -17,70 +33,64 @@ const filters = {
     invert: 'invert(100%)'
 };
 
-let currentFilter = filters.none;
-
-document.getElementById('filter-none').onclick = () => applyFilter(filters.none);
-document.getElementById('filter-grayscale').onclick = () => applyFilter(filters.grayscale);
-document.getElementById('filter-sepia').onclick = () => applyFilter(filters.sepia);
-document.getElementById('filter-invert').onclick = () => applyFilter(filters.invert);
+document.getElementById('filter-none').onclick = () => applyFilter('none');
+document.getElementById('filter-grayscale').onclick = () => applyFilter('grayscale');
+document.getElementById('filter-sepia').onclick = () => applyFilter('sepia');
+document.getElementById('filter-invert').onclick = () => applyFilter('invert');
 
 function applyFilter(filter) {
-    currentFilter = filter;
-    video.style.filter = currentFilter;
+    video.style.filter = filters[filter];
 }
 
+// Capture image
 document.getElementById('capture').onclick = () => {
     const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-
-    const ctx = canvas.getContext('2d');
-    ctx.filter = currentFilter;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    const img = new Image();
-    img.src = canvas.toDataURL('image/png');
-    img.width = 300; // Set image width for display
-    img.alt = 'Captured Image';
+    context.drawImage(video, 0, 0);
+    
+    const imageDataUrl = canvas.toDataURL('image/png');
+    const img = document.createElement('img');
+    img.src = imageDataUrl;
+    photoContainer.appendChild(img);
 
     const uploadButton = document.createElement('button');
-    uploadButton.textContent = 'Upload to S3';
-    uploadButton.onclick = () => uploadToS3(canvas.toDataURL('image/png'));
-
-    const photoDiv = document.createElement('div');
-    photoDiv.appendChild(img);
-    photoDiv.appendChild(uploadButton);
-    photoContainer.appendChild(photoDiv);
+    uploadButton.innerText = 'Upload to S3';
+    uploadButton.onclick = () => uploadImage(imageDataUrl);
+    photoContainer.appendChild(uploadButton);
 };
 
-async function uploadToS3(imageData) {
-    // Convert base64 string to binary
-    const response = await fetch(imageData);
-    const blob = await response.blob();
-
+// Upload to S3
+function uploadImage(imageDataUrl) {
+    const blob = dataURLtoBlob(imageDataUrl);
     const params = {
-        Bucket: 'himanshu2004', // Your bucket name
-        Key: `captured-image-${Date.now()}.png`, // Unique image name
+        Bucket: 'himanshu2004', // Your S3 bucket name
+        Key: `images/${Date.now()}.png`, // Unique file name
         Body: blob,
         ContentType: 'image/png',
-        ACL: 'public-read', // Make the image publicly readable
+        ACL: 'public-read' // Set permissions
     };
 
-    // Configure AWS SDK with environment variables
-    AWS.config.update({
-        region: 'ap-south-1', // Your AWS region
-        accessKeyId: 'YOUR_ACCESS_KEY_ID', // Replace with your actual access key
-        secretAccessKey: 'YOUR_SECRET_ACCESS_KEY' // Replace with your actual secret key
+    s3.upload(params, (err, data) => {
+        if (err) {
+            console.error('Error uploading data: ', err);
+            alert('Upload failed, please try again.');
+        } else {
+            console.log('Upload succeeded:', data);
+            alert('Image uploaded successfully! You can see it at: ' + data.Location);
+        }
     });
+}
 
-    const s3 = new AWS.S3();
-
-    try {
-        const result = await s3.upload(params).promise();
-        console.log('Upload Success', result);
-        alert('Upload Successful! Image URL: ' + result.Location);
-    } catch (error) {
-        console.error('Upload Error', error);
-        alert('Upload failed!');
+// Convert data URL to Blob
+function dataURLtoBlob(dataURL) {
+    const byteString = atob(dataURL.split(',')[1]);
+    const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+    const ab = new ArrayBuffer(byteString.length);
+    const ia = new Uint8Array(ab);
+    for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
     }
+    return new Blob([ab], { type: mimeString });
 }
