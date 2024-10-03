@@ -82,6 +82,14 @@ async function uploadToS3(imageData) {
         const result = await s3.upload(params).promise();
         console.log('Upload Success', result);
         alert('Upload Successful! Image URL: ' + result.Location);
+        
+        // Create a download button
+        const downloadLink = document.createElement('a');
+        downloadLink.href = result.Location;
+        downloadLink.textContent = 'Download';
+        downloadLink.className = 'btn';
+        downloadLink.target = '_blank';
+        photoContainer.appendChild(downloadLink);
     } catch (error) {
         console.error('Upload Error', error);
         alert('Upload failed!');
