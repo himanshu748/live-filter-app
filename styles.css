@@ -1,48 +1,39 @@
 body {
     font-family: Arial, sans-serif;
-    text-align: center;
+    background-color: #f4f4f4;
+    color: #333;
     margin: 0;
     padding: 0;
-    background-color: #f0f0f0;
 }
 
-h1 {
-    margin: 20px 0;
+.container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
 }
 
 video {
-    border: 2px solid #333;
-    margin: 10px auto;
     width: 100%;
-    max-width: 600px;
-    display: block;
+    max-width: 100%;
+    border: 2px solid #333;
+    border-radius: 10px;
+    margin-bottom: 20px;
 }
 
-.filters {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
+.controls {
     margin: 20px 0;
 }
 
-.filters button {
-    flex: 1 1 calc(33.333% - 20px);
-    min-width: 100px;
-}
-
 button {
-    padding: 10px 15px;
-    margin: 5px;
     background-color: #007bff;
     color: white;
     border: none;
     border-radius: 5px;
+    padding: 10px 15px;
     cursor: pointer;
-    font-size: 16px;
-    width: 100%;
-    max-width: 200px;
-    display: inline-block;
+    margin: 5px;
+    transition: background-color 0.3s;
 }
 
 button:hover {
@@ -51,28 +42,14 @@ button:hover {
 
 #photo-container {
     margin-top: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
 }
 
 #photo-container img {
-    display: block;
-    margin: 10px auto;
     max-width: 100%;
+    border: 2px solid #333;
+    border-radius: 10px;
 }
 
-.btn {
-    padding: 10px 15px;
-    background-color: #28a745;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    display: inline-block;
+#photo-container div {
     margin-top: 10px;
-}
-
-.btn:hover {
-    background-color: #218838;
 }
