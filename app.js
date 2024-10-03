@@ -1,6 +1,6 @@
 // Configure AWS SDK
 AWS.config.update({
-    region: 'ap-south-1', // Update to your region
+    region: 'us-east-1', // Update to your region
     credentials: new AWS.Credentials({
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
