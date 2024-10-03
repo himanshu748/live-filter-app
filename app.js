@@ -9,7 +9,6 @@ navigator.mediaDevices.getUserMedia({ video: true })
         console.error("Error accessing media devices.", err);
     });
 
-// Filter buttons
 const filters = {
     none: 'none',
     grayscale: 'grayscale(100%)',
@@ -44,7 +43,7 @@ document.getElementById('capture').onclick = () => {
 
     const img = new Image();
     img.src = canvas.toDataURL('image/png');
-    img.width = 300; // Set image width for display
+    img.width = 300;
     img.alt = 'Captured Image';
 
     const uploadButton = document.createElement('button');
@@ -62,18 +61,17 @@ async function uploadToS3(imageData) {
     const blob = await response.blob();
 
     const params = {
-        Bucket: 'himanshu2004', // Your bucket name
-        Key: `captured-image-${Date.now()}.png`, // Unique image name
+        Bucket: 'himanshu2004',
+        Key: `captured-image-${Date.now()}.png`,
         Body: blob,
         ContentType: 'image/png',
-        ACL: 'public-read', // Make the image publicly readable
+        ACL: 'public-read',
     };
 
-    // Configure AWS SDK with environment variables
     AWS.config.update({
-        region: 'ap-south-1', // or us-east-1 as per your configuration
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID, // Access Key
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY // Secret Key
+        region: 'ap-south-1',
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
     });
 
     const s3 = new AWS.S3();
@@ -82,8 +80,7 @@ async function uploadToS3(imageData) {
         const result = await s3.upload(params).promise();
         console.log('Upload Success', result);
         alert('Upload Successful! Image URL: ' + result.Location);
-        
-        // Create a download button
+
         const downloadLink = document.createElement('a');
         downloadLink.href = result.Location;
         downloadLink.textContent = 'Download';
