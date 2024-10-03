@@ -1,7 +1,7 @@
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    color: #333;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(to right, #ff7e5f, #feb47b);
+    color: #fff;
     margin: 0;
     padding: 0;
 }
@@ -11,14 +11,23 @@ body {
     margin: auto;
     padding: 20px;
     text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+h1 {
+    margin-bottom: 20px;
+    font-size: 2.5em;
 }
 
 video {
     width: 100%;
     max-width: 100%;
-    border: 2px solid #333;
+    border: 2px solid #fff;
     border-radius: 10px;
     margin-bottom: 20px;
+    background-color: #000;
 }
 
 .controls {
@@ -26,7 +35,7 @@ video {
 }
 
 button {
-    background-color: #007bff;
+    background-color: #ff6f61;
     color: white;
     border: none;
     border-radius: 5px;
@@ -37,7 +46,7 @@ button {
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #ff4a3a;
 }
 
 #photo-container {
@@ -46,7 +55,7 @@ button:hover {
 
 #photo-container img {
     max-width: 100%;
-    border: 2px solid #333;
+    border: 2px solid #fff;
     border-radius: 10px;
 }
 
