@@ -7,18 +7,21 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Live Filter Application</h1>
-    <video id="video" autoplay></video>
-    <div class="filters">
-        <button id="filter-none">No Filter</button>
-        <button id="filter-grayscale">Grayscale</button>
-        <button id="filter-sepia">Sepia</button>
-        <button id="filter-invert">Invert Colors</button>
-        <button id="filter-contrast">High Contrast</button>
-        <button id="filter-brightness">Brighten</button>
+    <div class="container">
+        <h1>Live Filter Application</h1>
+        <video id="video" autoplay></video>
+        
+        <div class="controls">
+            <h2>Filters</h2>
+            <button id="filter-none">No Filter</button>
+            <button id="filter-grayscale">Grayscale</button>
+            <button id="filter-sepia">Sepia</button>
+            <button id="filter-invert">Invert Colors</button>
+        </div>
+        
+        <button id="capture">Capture Image</button>
+        <div id="photo-container"></div>
     </div>
-    <button id="capture">Capture</button>
-    <div id="photo-container"></div>
     
     <!-- Include AWS SDK -->
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1061.0.min.js"></script>
