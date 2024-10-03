@@ -9,13 +9,12 @@ navigator.mediaDevices.getUserMedia({ video: true })
         console.error("Error accessing media devices.", err);
     });
 
+// Filter buttons
 const filters = {
     none: 'none',
     grayscale: 'grayscale(100%)',
     sepia: 'sepia(100%)',
-    invert: 'invert(100%)',
-    contrast: 'contrast(200%)',
-    brightness: 'brightness(150%)'
+    invert: 'invert(100%)'
 };
 
 let currentFilter = filters.none;
@@ -24,8 +23,6 @@ document.getElementById('filter-none').onclick = () => applyFilter(filters.none)
 document.getElementById('filter-grayscale').onclick = () => applyFilter(filters.grayscale);
 document.getElementById('filter-sepia').onclick = () => applyFilter(filters.sepia);
 document.getElementById('filter-invert').onclick = () => applyFilter(filters.invert);
-document.getElementById('filter-contrast').onclick = () => applyFilter(filters.contrast);
-document.getElementById('filter-brightness').onclick = () => applyFilter(filters.brightness);
 
 function applyFilter(filter) {
     currentFilter = filter;
@@ -43,7 +40,7 @@ document.getElementById('capture').onclick = () => {
 
     const img = new Image();
     img.src = canvas.toDataURL('image/png');
-    img.width = 300;
+    img.width = 300; // Set image width for display
     img.alt = 'Captured Image';
 
     const uploadButton = document.createElement('button');
@@ -57,21 +54,23 @@ document.getElementById('capture').onclick = () => {
 };
 
 async function uploadToS3(imageData) {
+    // Convert base64 string to binary
     const response = await fetch(imageData);
     const blob = await response.blob();
 
     const params = {
-        Bucket: 'himanshu2004',
-        Key: `captured-image-${Date.now()}.png`,
+        Bucket: 'himanshu2004', // Your bucket name
+        Key: `captured-image-${Date.now()}.png`, // Unique image name
         Body: blob,
         ContentType: 'image/png',
-        ACL: 'public-read',
+        ACL: 'public-read', // Make the image publicly readable
     };
 
+    // Configure AWS SDK with environment variables
     AWS.config.update({
-        region: 'ap-south-1',
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+        region: 'ap-south-1', // Your AWS region
+        accessKeyId: 'YOUR_ACCESS_KEY_ID', // Replace with your actual access key
+        secretAccessKey: 'YOUR_SECRET_ACCESS_KEY' // Replace with your actual secret key
     });
 
     const s3 = new AWS.S3();
@@ -80,13 +79,6 @@ async function uploadToS3(imageData) {
         const result = await s3.upload(params).promise();
         console.log('Upload Success', result);
         alert('Upload Successful! Image URL: ' + result.Location);
-
-        const downloadLink = document.createElement('a');
-        downloadLink.href = result.Location;
-        downloadLink.textContent = 'Download';
-        downloadLink.className = 'btn';
-        downloadLink.target = '_blank';
-        photoContainer.appendChild(downloadLink);
     } catch (error) {
         console.error('Upload Error', error);
         alert('Upload failed!');
