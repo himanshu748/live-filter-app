@@ -4,28 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Filter App</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1386.0.min.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Live Filter App</h1>
-        <div class="video-container">
-            <video id="video" autoplay></video>
-            <canvas id="canvas" style="display:none;"></canvas>
-        </div>
-        <div class="controls">
-            <button id="start-recording" class="btn primary">Start Recording</button>
-            <div class="filter-buttons">
-                <button id="filter1" class="btn">Filter 1</button>
-                <button id="filter2" class="btn">Filter 2</button>
-                <button id="filter3" class="btn">Filter 3</button>
-                <button id="filter4" class="btn">Filter 4</button>
-            </div>
-            <button id="capture" class="btn primary">Capture</button>
-        </div>
-        <div id="captured-images" class="gallery"></div>
+    <h1>Live Filter Application</h1>
+    <video id="video" autoplay></video>
+    <div class="filters">
+        <button id="filter-none">No Filter</button>
+        <button id="filter-grayscale">Grayscale</button>
+        <button id="filter-sepia">Sepia</button>
+        <button id="filter-invert">Invert Colors</button>
     </div>
+    <button id="capture">Capture</button>
+    <div id="photo-container"></div>
+    
+    <!-- Include AWS SDK -->
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1061.0.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
