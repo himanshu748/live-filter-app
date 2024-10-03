@@ -14,7 +14,9 @@ const filters = {
     none: 'none',
     grayscale: 'grayscale(100%)',
     sepia: 'sepia(100%)',
-    invert: 'invert(100%)'
+    invert: 'invert(100%)',
+    contrast: 'contrast(200%)',
+    brightness: 'brightness(150%)'
 };
 
 let currentFilter = filters.none;
@@ -23,6 +25,8 @@ document.getElementById('filter-none').onclick = () => applyFilter(filters.none)
 document.getElementById('filter-grayscale').onclick = () => applyFilter(filters.grayscale);
 document.getElementById('filter-sepia').onclick = () => applyFilter(filters.sepia);
 document.getElementById('filter-invert').onclick = () => applyFilter(filters.invert);
+document.getElementById('filter-contrast').onclick = () => applyFilter(filters.contrast);
+document.getElementById('filter-brightness').onclick = () => applyFilter(filters.brightness);
 
 function applyFilter(filter) {
     currentFilter = filter;
