@@ -1,100 +1,85 @@
 const video = document.getElementById('video');
-const canvas = document.getElementById('canvas');
-const capturedImagesContainer = document.getElementById('captured-images');
-const startRecordingBtn = document.getElementById('start-recording');
-const constraints = { video: true };
+const photoContainer = document.getElementById('photo-container');
 
-let isRecording = false;
-
-navigator.mediaDevices.getUserMedia(constraints)
-    .then((stream) => {
+navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream => {
         video.srcObject = stream;
     })
-    .catch((error) => {
-        console.error('Error accessing the camera: ', error);
+    .catch(err => {
+        console.error("Error accessing media devices.", err);
     });
 
-startRecordingBtn.onclick = () => {
-    isRecording = !isRecording;
-    startRecordingBtn.textContent = isRecording ? 'Stop Recording' : 'Start Recording';
-    startRecordingBtn.classList.toggle('recording');
+// Filter buttons
+const filters = {
+    none: 'none',
+    grayscale: 'grayscale(100%)',
+    sepia: 'sepia(100%)',
+    invert: 'invert(100%)'
 };
 
-const filters = ['filter1', 'filter2', 'filter3', 'filter4'];
-filters.forEach(filter => {
-    document.getElementById(filter).onclick = () => applyFilter(filter);
-});
+let currentFilter = filters.none;
 
-document.getElementById('capture').onclick = () => {
-    if (!isRecording) {
-        alert('Please start recording first!');
-        return;
-    }
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-    const imageDataUrl = canvas.toDataURL('image/png');
-    const imgContainer = document.createElement('div');
-    imgContainer.className = 'image-container';
-    const img = document.createElement('img');
-    img.src = imageDataUrl;
-    imgContainer.appendChild(img);
-    createUploadButton(imgContainer, imageDataUrl);
-    capturedImagesContainer.appendChild(imgContainer);
-};
+document.getElementById('filter-none').onclick = () => applyFilter(filters.none);
+document.getElementById('filter-grayscale').onclick = () => applyFilter(filters.grayscale);
+document.getElementById('filter-sepia').onclick = () => applyFilter(filters.sepia);
+document.getElementById('filter-invert').onclick = () => applyFilter(filters.invert);
 
 function applyFilter(filter) {
-    // Apply filter logic here (this is just an example)
-    console.log(`Applying ${filter}`);
-    video.style.filter = getComputedStyle(document.getElementById(filter)).getPropertyValue('filter');
+    currentFilter = filter;
+    video.style.filter = currentFilter;
 }
 
-function createUploadButton(container, imageDataUrl) {
+document.getElementById('capture').onclick = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext('2d');
+    ctx.filter = currentFilter;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const img = new Image();
+    img.src = canvas.toDataURL('image/png');
+    img.width = 300; // Set image width for display
+    img.alt = 'Captured Image';
+
     const uploadButton = document.createElement('button');
-    uploadButton.className = 'btn';
-    uploadButton.innerText = 'Upload';
-    uploadButton.onclick = () => uploadToS3(imageDataUrl);
-    container.appendChild(uploadButton);
-}
+    uploadButton.textContent = 'Upload to S3';
+    uploadButton.onclick = () => uploadToS3(canvas.toDataURL('image/png'));
 
-function uploadToS3(imageDataUrl) {
-    // Note: This is not secure and should not be used in a production environment
+    const photoDiv = document.createElement('div');
+    photoDiv.appendChild(img);
+    photoDiv.appendChild(uploadButton);
+    photoContainer.appendChild(photoDiv);
+};
+
+async function uploadToS3(imageData) {
+    const response = await fetch(imageData);
+    const blob = await response.blob();
+
+    const params = {
+        Bucket: 'himanshu2004', // Your bucket name
+        Key: `captured-image-${Date.now()}.png`, // Unique image name
+        Body: blob,
+        ContentType: 'image/png',
+        ACL: 'public-read', // Make the image publicly readable
+    };
+
+    // Configure AWS SDK with environment variables
     AWS.config.update({
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        region: 'ap-south-1'
+        region: 'ap-south-1', // or us-east-1 as per your configuration
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID, // Access Key
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY // Secret Key
     });
 
     const s3 = new AWS.S3();
-    const bucketName = 'himanshu2004';
 
-    const base64Data = imageDataUrl.replace(/^data:image\/\w+;base64,/, "");
-    const params = {
-        Bucket: bucketName,
-        Key: `photos/${Date.now()}.png`,
-        Body: Buffer.from(base64Data, 'base64'),
-        ContentEncoding: 'base64',
-        ContentType: 'image/png'
-    };
-
-    s3.upload(params, (err, data) => {
-        if (err) {
-            console.error('Error uploading photo:', err);
-            alert('Error uploading photo.');
-        } else {
-            console.log('Successfully uploaded photo to:', data.Location);
-            alert('Photo uploaded successfully!');
-            // Create download link
-            createDownloadLink(data.Location);
-        }
-    });
-}
-
-function createDownloadLink(url) {
-    const downloadLink = document.createElement('a');
-    downloadLink.href = url;
-    downloadLink.textContent = 'Download';
-    downloadLink.className = 'btn';
-    downloadLink.target = '_blank';
-    capturedImagesContainer.appendChild(downloadLink);
+    try {
+        const result = await s3.upload(params).promise();
+        console.log('Upload Success', result);
+        alert('Upload Successful! Image URL: ' + result.Location);
+    } catch (error) {
+        console.error('Upload Error', error);
+        alert('Upload failed!');
+    }
 }
